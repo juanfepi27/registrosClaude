@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro · Cumbre Digital COLOMBIA 2026</title>
+  <style>
+    /* ===== Variables de diseño (tema oscuro + azul eléctrico) ===== */
+    :root {
+      --fondo: #0a0e1a;
+      --tarjeta: #121829;
+      --borde: #232c45;
+      --campo: #0d1322;
+      --texto: #e6ebf5;
+      --texto-tenue: #8b95ad;
+      --acento: #1f6bff;
+      --acento-brillo: #3d8bff;
+      --error: #ff5c7a;
+      --exito: #2ee6a6;
+      --radio: 14px;
+    }
+
+    /* ===== Reinicio básico ===== */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--texto);
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(31, 107, 255, 0.28), transparent 70%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(61, 139, 255, 0.10), transparent 70%),
+        var(--fondo);
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px;
+      line-height: 1.5;
+    }
+
+    /* ===== Encabezado / logo de texto ===== */
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      margin: 0;
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .logo .resaltado {
+      color: var(--acento-brillo);
+      text-shadow: 0 0 24px rgba(61, 139, 255, 0.55);
+    }
+
+    .logo .anio {
+      color: var(--texto-tenue);
+      font-weight: 600;
+    }
+
+    .subtitulo {
+      margin: 8px 0 0;
+      color: var(--texto-tenue);
+      font-size: 1rem;
+    }
+
+    /* ===== Tarjeta contenedora ===== */
+    .tarjeta {
+      width: 100%;
+      max-width: 520px;
+      background: var(--tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: var(--radio);
+      padding: 36px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(31, 107, 255, 0.05);
+    }
+
+    .tarjeta h2 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+    }
+
+    .tarjeta .ayuda {
+      margin: 0 0 24px;
+      color: var(--texto-tenue);
+      font-size: 0.95rem;
+    }
+
+    /* ===== Campos del formulario ===== */
+    .campo {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      font: inherit;
+      color: var(--texto);
+      background: var(--campo);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input::placeholder { color: #5a6480; }
+
+    /* Flecha personalizada para el selector */
+    select {
+      appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, var(--texto-tenue) 50%),
+                        linear-gradient(135deg, var(--texto-tenue) 50%, transparent 50%);
+      background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%;
+      background-size: 5px 5px;
+      background-repeat: no-repeat;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+    select option { background: var(--tarjeta); color: var(--texto); }
+
+    input:focus, select:focus {
+      border-color: var(--acento);
+      box-shadow: 0 0 0 3px rgba(31, 107, 255, 0.3);
+    }
+
+    /* Estado de error */
+    .campo.invalido input,
+    .campo.invalido select {
+      border-color: var(--error);
+    }
+
+    .campo.invalido input:focus,
+    .campo.invalido select:focus {
+      box-shadow: 0 0 0 3px rgba(255, 92, 122, 0.25);
+    }
+
+    .error {
+      display: block;
+      min-height: 1.2em;
+      margin-top: 6px;
+      color: var(--error);
+      font-size: 0.85rem;
+    }
+
+    /* ===== Botones ===== */
+    .boton {
+      width: 100%;
+      padding: 14px 20px;
+      margin-top: 8px;
+      font: inherit;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, var(--acento), var(--acento-brillo));
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(31, 107, 255, 0.35);
+      transition: transform 0.15s, box-shadow 0.2s, filter 0.2s;
+    }
+
+    .boton:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 10px 30px rgba(31, 107, 255, 0.5);
+    }
+
+    .boton:active { transform: translateY(1px); }
+
+    .boton:focus-visible {
+      outline: 2px solid var(--acento-brillo);
+      outline-offset: 3px;
+    }
+
+    /* ===== Pantalla de confirmación ===== */
+    .confirmacion {
+      text-align: center;
+      animation: aparecer 0.45s ease-out;
+    }
+
+    .icono-exito {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 16px;
+      display: grid;
+      place-items: center;
+      font-size: 2.2rem;
+      color: var(--exito);
+      border: 2px solid var(--exito);
+      border-radius: 50%;
+      box-shadow: 0 0 30px rgba(46, 230, 166, 0.3);
+    }
+
+    .numero-registro {
+      display: inline-block;
+      margin: 18px 0;
+      padding: 12px 24px;
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--acento-brillo);
+      background: rgba(31, 107, 255, 0.1);
+      border: 1px dashed var(--acento);
+      border-radius: 10px;
+    }
+
+    .etiqueta {
+      display: block;
+      color: var(--texto-tenue);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .nombre-asistente {
+      margin: 4px 0 16px;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .bienvenida {
+      margin: 0 0 24px;
+      color: var(--texto-tenue);
+    }
+
+    .bienvenida strong { color: var(--texto); }
+
+    [hidden] { display: none !important; }
+
+    @keyframes aparecer {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Respetar la preferencia de movimiento reducido */
+    @media (prefers-reduced-motion: reduce) {
+      .confirmacion { animation: none; }
+      .boton, input, select { transition: none; }
+    }
+
+    footer {
+      margin-top: 32px;
+      color: var(--texto-tenue);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    /* ===== Ajustes para pantallas pequeñas ===== */
+    @media (max-width: 480px) {
+      body { padding: 32px 16px; }
+      .tarjeta { padding: 24px 20px; }
+      .numero-registro { font-size: 1.35rem; padding: 10px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado con el logo de texto del evento -->
+  <header>
+    <h1 class="logo">
+      Cumbre Digital <span class="resaltado">COLOMBIA</span> <span class="anio">2026</span>
+    </h1>
+    <p class="subtitulo">Transformación digital para PyMEs</p>
+  </header>
+
+  <main class="tarjeta">
+
+    <!-- ===== Sección del formulario de registro ===== -->
+    <section id="seccion-formulario">
+      <h2>Registro de asistentes</h2>
+      <p class="ayuda">Completa tus datos para asegurar tu lugar. Todos los campos son obligatorios.</p>
+
+      <!-- novalidate: la validación la hacemos con JavaScript para mostrar mensajes en español -->
+      <form id="formulario-registro" novalidate>
+        <div class="campo">
+          <label for="nombre">Nombre completo</label>
+          <input type="text" id="nombre" name="nombre" autocomplete="name"
+                 placeholder="Ej. María Fernanda Gómez" required
+                 aria-describedby="error-nombre">
+          <span class="error" id="error-nombre" aria-live="polite"></span>
+        </div>
+
+        <div class="campo">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email"
+                 placeholder="nombre@empresa.com" required
+                 aria-describedby="error-email">
+          <span class="error" id="error-email" aria-live="polite"></span>
+        </div>
+
+        <div class="campo">
+          <label for="empresa">Empresa u organización</label>
+          <input type="text" id="empresa" name="empresa" autocomplete="organization"
+                 placeholder="Ej. Innova PyME S.A.S." required
+                 aria-describedby="error-empresa">
+          <span class="error" id="error-empresa" aria-live="polite"></span>
+        </div>
+
+        <div class="campo">
+          <label for="area">Área de interés</label>
+          <select id="area" name="area" required aria-describedby="error-area">
+            <option value="">Selecciona un área</option>
+            <option value="Tecnología">Tecnología</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Negocios">Negocios</option>
+            <option value="Emprendimiento">Emprendimiento</option>
+          </select>
+          <span class="error" id="error-area" aria-live="polite"></span>
+        </div>
+
+        <button type="submit" class="boton">Registrarme</button>
+      </form>
+    </section>
+
+    <!-- ===== Sección de confirmación (oculta hasta completar el registro) ===== -->
+    <section id="seccion-confirmacion" class="confirmacion" hidden>
+      <div class="icono-exito" aria-hidden="true">✓</div>
+      <h2 id="titulo-confirmacion" tabindex="-1">¡Registro exitoso!</h2>
+
+      <div class="numero-registro" id="numero-registro">REG-0000</div>
+
+      <span class="etiqueta">Asistente registrado</span>
+      <p class="nombre-asistente" id="nombre-asistente"></p>
+
+      <p class="bienvenida" id="mensaje-bienvenida"></p>
+
+      <button type="button" class="boton" id="boton-otro">Registrar a otra persona</button>
+    </section>
+
+  </main>
+
+  <footer>© 2026 Cumbre Digital COLOMBIA · Transformación digital para PyMEs</footer>
+
+  <script>
+    // ===== Referencias a los elementos del DOM =====
+    const formulario = document.getElementById("formulario-registro");
+    const seccionFormulario = document.getElementById("seccion-formulario");
+    const seccionConfirmacion = document.getElementById("seccion-confirmacion");
+    const botonOtro = document.getElementById("boton-otro");
+
+    // Campos del formulario que se validan
+    const campos = ["nombre", "email", "empresa", "area"].map(
+      (id) => document.getElementById(id)
+    );
+
+    // Expresión regular para validar el formato del correo electrónico
+    const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    // Mensajes de error en español para cada campo vacío
+    const MENSAJES_OBLIGATORIO = {
+      nombre: "Ingresa tu nombre completo.",
+      email: "Ingresa tu correo electrónico.",
+      empresa: "Ingresa el nombre de tu empresa u organización.",
+      area: "Selecciona un área de interés."
+    };
+
+    /**
+     * Valida un campo y devuelve el mensaje de error correspondiente,
+     * o una cadena vacía si el valor es válido.
+     */
+    function validarCampo(campo) {
+      const valor = campo.value.trim();
+
+      if (valor === "") {
+        return MENSAJES_OBLIGATORIO[campo.id];
+      }
+
+      if (campo.id === "email" && !REGEX_EMAIL.test(valor)) {
+        return "Ingresa un correo electrónico válido (ej. nombre@empresa.com).";
+      }
+
+      return "";
+    }
+
+    /**
+     * Muestra u oculta el mensaje de error de un campo y actualiza su estilo.
+     */
+    function mostrarError(campo, mensaje) {
+      const contenedor = campo.closest(".campo");
+      const spanError = document.getElementById("error-" + campo.id);
+
+      spanError.textContent = mensaje;
+      contenedor.classList.toggle("invalido", mensaje !== "");
+      campo.setAttribute("aria-invalid", mensaje !== "" ? "true" : "false");
+    }
+
+    /**
+     * Genera un número de registro con formato REG-XXXX (4 dígitos aleatorios).
+     */
+    function generarNumeroRegistro() {
+      const digitos = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+      return "REG-" + digitos;
+    }
+
+    /**
+     * Oculta el formulario y muestra la pantalla de confirmación con los datos.
+     */
+    function mostrarConfirmacion(datos) {
+      document.getElementById("numero-registro").textContent = generarNumeroRegistro();
+      // Se usa textContent para evitar inyección de HTML con los datos del usuario
+      document.getElementById("nombre-asistente").textContent = datos.nombre;
+
+      const bienvenida = document.getElementById("mensaje-bienvenida");
+      bienvenida.textContent = "";
+      bienvenida.append(
+        "¡Bienvenido/a a la ",
+        crearNegrita("Cumbre Digital COLOMBIA 2026"),
+        "! Te esperamos para vivir juntos la transformación digital de las PyMEs. " +
+        "Hemos reservado tu lugar en el área de ",
+        crearNegrita(datos.area),
+        "."
+      );
+
+      seccionFormulario.hidden = true;
+      seccionConfirmacion.hidden = false;
+      document.getElementById("titulo-confirmacion").focus();
+    }
+
+    /**
+     * Crea un elemento <strong> con el texto indicado (de forma segura).
+     */
+    function crearNegrita(texto) {
+      const strong = document.createElement("strong");
+      strong.textContent = texto;
+      return strong;
+    }
+
+    /**
+     * Limpia el formulario, borra los errores y vuelve a mostrarlo.
+     */
+    function reiniciarFormulario() {
+      formulario.reset();
+      campos.forEach((campo) => mostrarError(campo, ""));
+
+      seccionConfirmacion.hidden = true;
+      seccionFormulario.hidden = false;
+      campos[0].focus();
+    }
+
+    // ===== Envío del formulario =====
+    formulario.addEventListener("submit", (evento) => {
+      evento.preventDefault();
+
+      let primerInvalido = null;
+
+      // Validar todos los campos y mostrar sus errores
+      campos.forEach((campo) => {
+        const mensaje = validarCampo(campo);
+        mostrarError(campo, mensaje);
+        if (mensaje && !primerInvalido) {
+          primerInvalido = campo;
+        }
+      });
+
+      // Si hay errores, llevar el foco al primer campo inválido
+      if (primerInvalido) {
+        primerInvalido.focus();
+        return;
+      }
+
+      mostrarConfirmacion({
+        nombre: campos[0].value.trim(),
+        email: campos[1].value.trim(),
+        empresa: campos[2].value.trim(),
+        area: campos[3].value
+      });
+    });
+
+    // ===== Validación en vivo: se quita el error en cuanto el usuario lo corrige =====
+    campos.forEach((campo) => {
+      const tipoEvento = campo.tagName === "SELECT" ? "change" : "input";
+      campo.addEventListener(tipoEvento, () => {
+        if (campo.closest(".campo").classList.contains("invalido")) {
+          mostrarError(campo, validarCampo(campo));
+        }
+      });
+    });
+
+    // ===== Botón "Registrar a otra persona" =====
+    botonOtro.addEventListener("click", reiniciarFormulario);
+  </script>
+</body>
+</html>
