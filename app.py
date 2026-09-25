@@ -10,12 +10,23 @@ Rutas:
 
 import os
 import re
-import sqlite3
 
+import psycopg
+from dotenv import load_dotenv
 from flask import Flask, abort, g, redirect, render_template, render_template_string, request, url_for
+from psycopg import errors
+from psycopg.rows import dict_row
 
 # ===== Configuración =====
-RUTA_BD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "evento.db")
+# En local lee el archivo .env; en Render no existe y la variable viene del panel (Environment)
+load_dotenv()
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError(
+        "Falta la variable de entorno DATABASE_URL. "
+        "Cópiala en el archivo .env (ver .env.example) o configúrala en Render."
+    )
 
 AREAS = ["Tecnología", "Marketing", "Negocios", "Emprendimiento"]
 
@@ -36,10 +47,11 @@ app = Flask(__name__)
 
 # ===== Base de datos =====
 def obtener_bd():
-    """Devuelve la conexión a SQLite de la petición actual (se abre una sola vez por petición)."""
+    """Devuelve la conexión a PostgreSQL (Supabase) de la petición actual (se abre una sola vez por petición)."""
     if "bd" not in g:
-        g.bd = sqlite3.connect(RUTA_BD)
-        g.bd.row_factory = sqlite3.Row  # permite acceder a las columnas por nombre
+        # dict_row permite acceder a las columnas por nombre;
+        # prepare_threshold=None evita errores si se usa el pooler de Supabase en modo transacción
+        g.bd = psycopg.connect(DATABASE_URL, row_factory=dict_row, prepare_threshold=None)
     return g.bd
 
 
@@ -51,31 +63,17 @@ def cerrar_bd(_error):
         bd.close()
 
 
-def inicializar_bd():
-    """Crea la tabla de asistentes si todavía no existe."""
-    areas_sql = ", ".join(f"'{area}'" for area in AREAS)
-    with sqlite3.connect(RUTA_BD) as bd:
-        bd.execute(f"""
-            CREATE TABLE IF NOT EXISTS asistentes (
-                id             INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre         TEXT NOT NULL,
-                email          TEXT NOT NULL UNIQUE COLLATE NOCASE,
-                empresa        TEXT NOT NULL,
-                area           TEXT NOT NULL CHECK (area IN ({areas_sql})),
-                fecha_registro TEXT NOT NULL DEFAULT (datetime('now'))
-            )
-        """)
-
-
 def numero_registro(id_asistente):
     """Convierte el id de la base de datos al formato REG-0001."""
     return f"REG-{id_asistente:04d}"
 
 
 def a_diccionario(fila):
-    """Convierte una fila de SQLite en diccionario y le agrega el número de registro."""
+    """Convierte una fila de PostgreSQL en diccionario y le agrega el número de registro."""
     asistente = dict(fila)
     asistente["numero"] = numero_registro(asistente["id"])
+    # PostgreSQL devuelve la fecha como datetime; se muestra sin microsegundos
+    asistente["fecha_registro"] = asistente["fecha_registro"].strftime("%Y-%m-%d %H:%M:%S")
     return asistente
 
 
@@ -123,17 +121,19 @@ def registrar():
     if not errores:
         bd = obtener_bd()
         try:
-            # Consulta con parámetros (?) para evitar inyección SQL
-            cursor = bd.execute(
-                "INSERT INTO asistentes (nombre, email, empresa, area) VALUES (?, ?, ?, ?)",
+            # Consulta con parámetros (%s) para evitar inyección SQL; RETURNING devuelve el id creado
+            id_asistente = bd.execute(
+                "INSERT INTO asistentes (nombre, email, empresa, area) VALUES (%s, %s, %s, %s) RETURNING id",
                 (datos["nombre"], datos["email"], datos["empresa"], datos["area"]),
-            )
+            ).fetchone()["id"]
             bd.commit()
-        except sqlite3.IntegrityError:
+        except errors.UniqueViolation:
+            # En PostgreSQL la transacción queda abortada tras un error: hay que deshacerla
+            bd.rollback()
             errores["email"] = "Este correo ya está registrado."
         else:
             # Redirigir después del POST evita registros duplicados al recargar la página
-            return redirect(url_for("confirmacion", id_asistente=cursor.lastrowid))
+            return redirect(url_for("confirmacion", id_asistente=id_asistente))
 
     # Hubo errores: se vuelve a mostrar el formulario con los mensajes y los datos escritos
     return render_template("index.html", areas=AREAS, datos=datos, errores=errores), 400
@@ -143,7 +143,7 @@ def registrar():
 def confirmacion(id_asistente):
     """Muestra la pantalla de registro exitoso de un asistente."""
     fila = obtener_bd().execute(
-        "SELECT * FROM asistentes WHERE id = ?", (id_asistente,)
+        "SELECT * FROM asistentes WHERE id = %s", (id_asistente,)
     ).fetchone()
 
     if fila is None:
@@ -180,10 +180,6 @@ def no_encontrado(_error):
         {% endblock %}
     """
     return render_template_string(plantilla), 404
-
-
-# La tabla se crea al importar el módulo, así funciona tanto con `flask run` como con gunicorn
-inicializar_bd()
 
 
 if __name__ == "__main__":

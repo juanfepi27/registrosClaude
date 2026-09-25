@@ -19,3 +19,6 @@ CLAUDE.md
 
 # Version antigua
 fase1/
+
+# Variables de entorno con credenciales (no subir nunca)
+.env
