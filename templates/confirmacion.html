@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block titulo %}Registro exitoso{% endblock %}
+
+{% block contenido %}
+  <!-- ===== Sección de confirmación ===== -->
+  <section id="seccion-confirmacion" class="confirmacion">
+    <div class="icono-exito" aria-hidden="true">✓</div>
+    <h2 id="titulo-confirmacion">¡Registro exitoso!</h2>
+
+    <div class="numero-registro" id="numero-registro">{{ asistente.numero }}</div>
+
+    <span class="etiqueta">Asistente registrado</span>
+    <p class="nombre-asistente" id="nombre-asistente">{{ asistente.nombre }}</p>
+
+    <p class="bienvenida" id="mensaje-bienvenida">
+      ¡Bienvenido/a a la <strong>Cumbre Digital COLOMBIA 2026</strong>!
+      Te esperamos para vivir juntos la transformación digital de las PyMEs.
+      Hemos reservado tu lugar en el área de <strong>{{ asistente.area }}</strong>.
+    </p>
+
+    <a href="{{ url_for('inicio') }}" class="boton" id="boton-otro">Registrar a otra persona</a>
+  </section>
+{% endblock %}

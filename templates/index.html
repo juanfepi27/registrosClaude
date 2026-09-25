@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block titulo %}Registro{% endblock %}
+
+{# Macro para pintar un campo con su estado de error (viene del servidor si falló la validación) #}
+{% macro clase_campo(nombre) %}campo{% if errores.get(nombre) %} invalido{% endif %}{% endmacro %}
+
+{% block contenido %}
+  <!-- ===== Sección del formulario de registro ===== -->
+  <section id="seccion-formulario">
+    <h2>Registro de asistentes</h2>
+    <p class="ayuda">Completa tus datos para asegurar tu lugar. Todos los campos son obligatorios.</p>
+
+    <!-- novalidate: la validación la hacemos con JavaScript para mostrar mensajes en español -->
+    <form id="formulario-registro" method="post" action="{{ url_for('registrar') }}" novalidate>
+      <div class="{{ clase_campo('nombre') }}">
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" autocomplete="name"
+               placeholder="Ej. María Fernanda Gómez" required maxlength="120"
+               value="{{ datos.get('nombre', '') }}"
+               aria-describedby="error-nombre"
+               aria-invalid="{{ 'true' if errores.get('nombre') else 'false' }}">
+        <span class="error" id="error-nombre" aria-live="polite">{{ errores.get('nombre', '') }}</span>
+      </div>
+
+      <div class="{{ clase_campo('email') }}">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="email"
+               placeholder="nombre@empresa.com" required maxlength="254"
+               value="{{ datos.get('email', '') }}"
+               aria-describedby="error-email"
+               aria-invalid="{{ 'true' if errores.get('email') else 'false' }}">
+        <span class="error" id="error-email" aria-live="polite">{{ errores.get('email', '') }}</span>
+      </div>
+
+      <div class="{{ clase_campo('empresa') }}">
+        <label for="empresa">Empresa u organización</label>
+        <input type="text" id="empresa" name="empresa" autocomplete="organization"
+               placeholder="Ej. Innova PyME S.A.S." required maxlength="120"
+               value="{{ datos.get('empresa', '') }}"
+               aria-describedby="error-empresa"
+               aria-invalid="{{ 'true' if errores.get('empresa') else 'false' }}">
+        <span class="error" id="error-empresa" aria-live="polite">{{ errores.get('empresa', '') }}</span>
+      </div>
+
+      <div class="{{ clase_campo('area') }}">
+        <label for="area">Área de interés</label>
+        <select id="area" name="area" required aria-describedby="error-area"
+                aria-invalid="{{ 'true' if errores.get('area') else 'false' }}">
+          <option value="">Selecciona un área</option>
+          {% for area in areas %}
+            <option value="{{ area }}" {% if datos.get('area') == area %}selected{% endif %}>{{ area }}</option>
+          {% endfor %}
+        </select>
+        <span class="error" id="error-area" aria-live="polite">{{ errores.get('area', '') }}</span>
+      </div>
+
+      <button type="submit" class="boton">Registrarme</button>
+    </form>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/validacion.js') }}"></script>
+{% endblock %}

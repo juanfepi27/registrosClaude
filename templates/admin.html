@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block titulo %}Administración{% endblock %}
+
+{% block clase_tarjeta %}ancha{% endblock %}
+
+{% block contenido %}
+  <h2>Asistentes registrados</h2>
+  <p class="ayuda">Listado de todas las personas inscritas, de la más reciente a la más antigua.</p>
+
+  <!-- ===== Contadores: total y por área ===== -->
+  <div class="contadores">
+    <div class="contador total">
+      <span class="etiqueta">Total</span>
+      <span class="valor">{{ asistentes | length }}</span>
+    </div>
+    {% for area, cantidad in conteo_areas.items() %}
+      <div class="contador">
+        <span class="etiqueta">{{ area }}</span>
+        <span class="valor">{{ cantidad }}</span>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- ===== Tabla de asistentes ===== -->
+  <div class="tabla-contenedor">
+    {% if asistentes %}
+      <table class="tabla-asistentes">
+        <thead>
+          <tr>
+            <th scope="col">Registro</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Email</th>
+            <th scope="col">Empresa</th>
+            <th scope="col">Área</th>
+            <th scope="col">Fecha (UTC)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for asistente in asistentes %}
+            <tr>
+              <td class="codigo">{{ asistente.numero }}</td>
+              <td>{{ asistente.nombre }}</td>
+              <td>{{ asistente.email }}</td>
+              <td>{{ asistente.empresa }}</td>
+              <td>{{ asistente.area }}</td>
+              <td>{{ asistente.fecha_registro }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="vacio">Todavía no hay asistentes registrados.</p>
+    {% endif %}
+  </div>
+{% endblock %}
